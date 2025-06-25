@@ -20,19 +20,44 @@
     @keyframes fall { to { transform: translateY(100vh) rotate(360deg); opacity:0; } }
 
     .screen {
-      margin:0 auto 20px; width:70%; background:#3b2f2f; height:30px;
-      text-align:center; line-height:30px; color:gold; font-weight:bold;
-      border:2px solid #ffd700;
+        /* was: width:70%; */
+        width: 100%;
+        max-width: 100%;
+        margin: 0 auto 20px;
+        /* …rest of your existing rules… */
     }
     .seat-grid {
-      display:grid; grid-template-columns:auto repeat(10,40px);
-      grid-gap:8px; justify-content:center; align-items:center;
+        display: grid;
+        /* was: grid-template-columns: auto repeat(10,40px); */
+        grid-template-columns: auto repeat(10, minmax(0, 1fr));
+        grid-gap: 8px;
+        justify-content: center;
+        align-items: center;
     }
     .seat {
-      width:40px; height:40px; border-radius:5px; background:#444;
-      text-align:center; line-height:40px; cursor:pointer;
-      color:#fff; user-select:none; border:1px solid #777;
+        /* remove fixed width/height */
+        /* was: width:40px; height:40px; */
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        /* optionally cap the size on larger screens */
+        max-width: 40px;
+        /* keep your existing visual rules */
+        border-radius: 5px;
+        background-color: #444;
+        text-align: center;
+        line-height: normal; /* will be overridden by flex centering below */
+        cursor: pointer;
+        color: white;
+        user-select: none;
+        border: 1px solid #777;
+
+        /* center the number inside */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1em;
     }
+
     .seat.taken { background:#777; cursor:not-allowed; }
     .seat.selected { background:#0f0; }
 
