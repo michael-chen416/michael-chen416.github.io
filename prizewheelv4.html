@@ -4,225 +4,258 @@
   <meta charset="UTF-8">
   <title>Seat Selection</title>
   <style>
-    /* ==================== Base Styles ==================== */
+    /* ===== Reset Body & Chat-Widget Wrapper ===== */
     body {
-      font-family: 'Georgia', serif;
-      padding: 30px;
-      background: radial-gradient(circle at center, #008b2c 0%, #4b0000 100%);
-      color: #fff;
       margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at center, #8b0000 0%, #4b0000 100%);
+      font-family: 'Georgia', serif;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
     }
-    .confetti {
-      position: fixed; top:0; width:10px; height:10px;
-      opacity:0.9; animation: fall linear forwards; z-index:9999;
-      border-radius:50%;
+    .chat-widget {
+      width: 100%;
+      max-width: 320px;
+      margin: 20px;
+      box-sizing: border-box;
+      padding: 10px;
+      background: #1f1f1f;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      overflow-y: auto;
     }
-    @keyframes fall { to { transform: translateY(100vh) rotate(360deg); opacity:0; } }
 
+    /* ===== Base Styles ===== */
     .screen {
-        /* was: width:70%; */
-        width: 100%;
-        max-width: 100%;
-        margin: 0 auto 20px;
-        /* …rest of your existing rules… */
+      margin: 0 auto 20px;
+      width: 100%;
+      background: #3b2f2f;
+      height: 30px;
+      text-align: center;
+      line-height: 30px;
+      color: gold;
+      font-weight: bold;
+      border: 2px solid #ffd700;
     }
     .seat-grid {
-        display: grid;
-        /* was: grid-template-columns: auto repeat(10,40px); */
-        grid-template-columns: auto repeat(10, minmax(0, 1fr));
-        grid-gap: 8px;
-        justify-content: center;
-        align-items: center;
+      display: grid;
+      grid-template-columns: auto repeat(8, 1fr);
+      grid-gap: 8px;
+      justify-content: stretch;
+      align-items: center;
+      overflow-x: auto;
     }
     .seat {
-        /* remove fixed width/height */
-        /* was: width:40px; height:40px; */
-        width: 100%;
-        aspect-ratio: 1 / 1;
-        /* optionally cap the size on larger screens */
-        max-width: 40px;
-        /* keep your existing visual rules */
-        border-radius: 5px;
-        background-color: #444;
-        text-align: center;
-        line-height: normal; /* will be overridden by flex centering below */
-        cursor: pointer;
-        color: white;
-        user-select: none;
-        border: 1px solid #777;
-
-        /* center the number inside */
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1em;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      min-width: 24px;
+      border-radius: 5px;
+      background-color: #444;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      border: 1px solid #777;
+      font-size: 1em;
     }
-
-    .seat.taken { background:#777; cursor:not-allowed; }
-    .seat.selected { background:#0f0; }
+    .seat.taken { background-color: #777; cursor: not-allowed; }
+    .seat.selected { background-color: #0f0; }
 
     .legend {
-      margin-top:10px; text-align:center;
+      margin-top: 10px;
+      text-align: center;
+    }
+    .legend span {
+      display: inline-block;
+      margin: 0 10px;
     }
     .legend .box {
-      display:inline-block; width:20px; height:20px;
-      vertical-align:middle; margin-right:5px;
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      vertical-align: middle;
+      margin-right: 5px;
     }
 
     .output {
-      text-align:center; margin-top:20px; font-size:18px;
+      text-align: center;
+      margin-top: 20px;
+      font-size: 18px;
     }
 
     .action-buttons {
-      display:flex; justify-content:center; margin-top:15px; gap:10px;
-      flex-wrap:wrap;
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 15px;
     }
     .action-buttons button {
-      padding:10px 20px; font-size:16px; cursor:pointer;
-      border:none; border-radius:5px; flex:1 1 auto;
+      flex: 0 0 auto;
+      padding: 8px 16px;
+      font-size: 14px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      min-width: 80px;
     }
-    /* ===== Button Size Override ===== */
-    .action-buttons button {
-      /* stop them stretching to fill the row */
-      flex: 0 0 auto !important;
-      /* a more typical padding and font */
-      padding: 8px 16px !important;
-      font-size: 14px !important;
-      /* optional: give them a min-width so they stay consistent */
-      min-width: 100px !important;
+    #previewBtn  { background: #0b3d0b; color: #fff; display: none; }
+    #lockInBtn   { background: gold;   color: #000; display: none; }
+    #clearAllBtn { background: #ff4136; color: #fff; display: none; }
+    #checkoutBtn { background: #0074D9; color: #fff; display: false; }
+
+    /* ===== Gift Modal & Confetti ===== */
+    .confetti {
+      position: fixed;
+      top: 0;
+      width: 10px;
+      height: 10px;
+      opacity: 0.9;
+      animation: fall linear forwards;
+      z-index: 9999;
+      border-radius: 50%;
     }
-
-    /* and for the checkout confirm/back buttons if you like */
-    .checkout-buttons button {
-      padding: 8px 16px !important;
-      font-size: 14px !important;
-      min-width: 100px;
+    @keyframes fall {
+      to {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
     }
-
-    #previewBtn  { background:#0b3d0b; color:#fff; display:none; }
-    #lockInBtn   { background:gold;   color:#000; display:none; }
-    #clearAllBtn { background:#ff4136; color:#fff; display:none; }
-    #checkoutBtn { background:#0074D9; color:#fff; display:none; }
-
-    /* ================= Gift Modal ================= */
-    #giftModal { display:none; position:fixed; top:0; left:0;
-      width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1002;
+    #giftModal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      z-index: 1002;
     }
     #giftModal.centered {
-      display:flex; justify-content:center; align-items:center;
-      flex-direction:column; text-align:center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      text-align: center;
     }
     .giftbox {
-      width:120px; height:120px; margin-bottom:20px;
-      background:url('https://i.imgur.com/T8hN4fR.gif') no-repeat center/contain;
+      width: 120px;
+      height: 120px;
+      margin-bottom: 20px;
+      background: url('https://i.imgur.com/T8hN4fR.gif') no-repeat center/contain;
     }
 
-    /* ================ Enhanced Checkout ================= */
+    /* ===== Enhanced Checkout ===== */
     #checkoutPage {
-      display:none;
-      background:#1a1a1a;
-      border:1px solid #444;
-      border-radius:8px;
-      padding:20px;
-      margin:30px auto 0;
-      max-width:500px;
+      display: none;
+      background: #1a1a1a;
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 30px;
     }
     #checkoutPage h2 {
-      margin-top:0; color:#ffd700;
-      text-align:center; font-size:1.6em; letter-spacing:1px;
+      margin-top: 0;
+      color: #ffd700;
+      text-align: center;
+      font-size: 1.6em;
+      letter-spacing: 1px;
     }
     #checkoutSummary p {
-      margin:8px 0; line-height:1.4;
+      margin: 8px 0;
+      line-height: 1.4;
     }
     #checkoutSummary hr {
-      border:0; border-top:1px solid #444;
-      margin:12px 0;
+      border: 0;
+      border-top: 1px solid #444;
+      margin: 12px 0;
     }
     .checkout-buttons {
-      text-align:center; margin-top:20px;
+      text-align: center;
+      margin-top: 20px;
     }
     .checkout-buttons button {
-      padding:10px 20px; margin:0 10px;
-      font-size:1em; border:none; border-radius:4px; cursor:pointer;
+      padding: 10px 20px;
+      margin: 0 10px;
+      font-size: 1em;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
     }
-    #confirmBtn { background:#2ECC40; color:#000; }
-    #backBtn    { background:#FF4136; color:#fff; }
+    #confirmBtn { background: #2ECC40; color: #000; }
+    #backBtn    { background: #FF4136; color: #fff; }
 
-    /* ===== Responsive (mobile / small windows) ===== */
-    @media (max-width:768px) {
-      .screen { width:100%; font-size:1rem; }
-      .seat-grid { grid-template-columns:auto repeat(5,1fr); grid-gap:6px; }
-      .seat { width:min(40px,16vw); height:min(40px,16vw); font-size:0.9rem; }
-      .action-buttons button { flex:1 1 48%; padding:8px 0; font-size:0.9rem; }
+    /* ===== Responsive ===== */
+    @media (max-width: 768px) {
+      .screen { font-size: 1rem; }
+      .seat-grid { grid-template-columns: auto repeat(8, 1fr); }
+      .seat { font-size: 0.9rem; }
     }
-    @media (max-width:480px) {
-      .seat-grid { grid-template-columns:auto repeat(3,1fr); grid-gap:4px; }
-      .seat { width:min(32px,22vw); height:min(32px,22vw); font-size:0.8rem; }
-      .action-buttons button { flex:1 1 100%; }
+    @media (max-width: 480px) {
+      .seat-grid { grid-template-columns: auto repeat(4, 1fr); }
+      .seat { font-size: 0.8rem; }
+      .action-buttons button { flex: 1 1 100%; }
     }
   </style>
 </head>
 <body>
+  <div class="chat-widget">
+    <!-- ============== SELECTION PAGE ============== -->
+    <div id="selectionPage">
+      <div class="screen">STAGE</div>
+      <div class="seat-grid" id="seatMap"></div>
 
-  <!-- ============== SELECTION PAGE ============== -->
-  <div id="selectionPage">
-    <div class="screen">STAGE</div>
-    <div class="seat-grid" id="seatMap"></div>
+      <div class="legend">
+        <span><span class="box" style="background:#444;"></span> Available</span>
+        <span><span class="box" style="background:#0f0;"></span> Selected</span>
+        <span><span class="box" style="background:#777;"></span> Taken</span>
+      </div>
 
-    <div class="legend">
-      <span><span class="box" style="background:#444;"></span> Available</span>
-      <span><span class="box" style="background:#0f0;"></span> Selected</span>
-      <span><span class="box" style="background:#777;"></span> Taken</span>
-    </div>
+      <div class="output" id="output">No seats selected.</div>
 
-    <div class="output" id="output">No seats selected.</div>
+      <div class="action-buttons">
+        <button id="previewBtn"  onclick="previewSeat()">Preview</button>
+        <button id="lockInBtn"   onclick="lockInSeat()">Lock In Seats</button>
+        <button id="clearAllBtn" onclick="clearAll()">Clear All</button>
+        <button id="checkoutBtn" onclick="showCheckout()">Checkout</button>
+      </div>
 
-    <div class="action-buttons">
-      <button id="previewBtn"  onclick="previewSeat()">Preview</button>
-      <button id="lockInBtn"   onclick="lockInSeat()">Lock In Seats</button>
-      <button id="clearAllBtn" onclick="clearAll()">Clear All</button>
-      <button id="checkoutBtn" onclick="showCheckout()">Checkout</button>
-    </div>
+      <!-- 3D Preview Modal -->
+      <div id="threeModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000;">
+        <div style="position:relative; width:80%; max-width:800px; height:500px; margin:60px auto; background:#000; border-radius:10px; overflow:hidden; box-shadow:0 0 10px rgba(0,0,0,0.5);">
+          <button onclick="document.getElementById('threeModal').style.display='none'" style="position:absolute; top:10px; right:10px; z-index:2; padding:6px 12px;">Close</button>
+          <canvas id="threeCanvas" style="width:100%; height:100%;"></canvas>
+        </div>
+      </div>
 
-    <!-- 3D Preview Modal -->
-    <div id="threeModal" style="display:none; position:fixed; top:0; left:0;
-         width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000;">
-      <div style="position:relative; width:80%; max-width:800px; height:500px;
-                  margin:60px auto; background:#000; border-radius:10px;
-                  overflow:hidden; box-shadow:0 0 10px rgba(0,0,0,0.5);">
-        <button onclick="document.getElementById('threeModal').style.display='none'"
-                style="position:absolute; top:10px; right:10px; z-index:2;
-                       padding:6px 12px;">Close</button>
-        <canvas id="threeCanvas" style="width:100%; height:100%;"></canvas>
+      <!-- Gift Modal -->
+      <div id="giftModal">
+        <div class="giftbox"></div>
+        <canvas id="giftCanvas" width="300" height="300"></canvas>
+        <div id="giftText" style="margin-top:20px; font-size:20px;"></div>
+        <button onclick="closeGiftModal()" style="margin-top:20px; padding:10px 20px; border:none; border-radius:5px; cursor:pointer;">Close</button>
       </div>
     </div>
+    <!-- =========== /SELECTION PAGE =========== -->
 
-    <!-- Gift Modal -->
-    <div id="giftModal">
-      <div class="giftbox"></div>
-      <canvas id="giftCanvas" width="300" height="300"></canvas>
-      <div id="giftText" style="margin-top:20px; font-size:20px;"></div>
-      <button onclick="closeGiftModal()"
-              style="margin-top:20px; padding:10px 20px; border:none;
-                     border-radius:5px; cursor:pointer;">Close</button>
+    <!-- ============= CHECKOUT PAGE ============= -->
+    <div id="checkoutPage">
+      <h2>Order Summary</h2>
+      <div id="checkoutSummary"></div>
+      <div class="checkout-buttons">
+        <button id="confirmBtn">Confirm Purchase</button>
+        <button id="backBtn">Back</button>
+      </div>
     </div>
+    <!-- =========== /CHECKOUT PAGE =========== -->
   </div>
-  <!-- =========== /SELECTION PAGE =========== -->
-
-  <!-- ============= CHECKOUT PAGE ============= -->
-  <div id="checkoutPage">
-    <h2>Order Summary</h2>
-    <div id="checkoutSummary"></div>
-    <div class="checkout-buttons">
-      <button id="confirmBtn">Confirm Purchase</button>
-      <button id="backBtn">Back</button>
-    </div>
-  </div>
-  <!-- =========== /CHECKOUT PAGE =========== -->
 
   <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
   <script>
-    // —— Globals & State ——  
+    // —— Globals & State ——
     const seatMapEl    = document.getElementById("seatMap");
     const previewBtn   = document.getElementById("previewBtn");
     const lockInBtn    = document.getElementById("lockInBtn");
@@ -231,7 +264,7 @@
     const outputEl     = document.getElementById("output");
 
     const rows         = ['A','B','C','D','E'];
-    const cols         = 10;
+    const cols         = 8;
     const takenSeats   = ['A1','B5','C3','D8','E2'];
     const prices       = { A:150, B:150, C:100, D:100, E:60 };
     const specialSeats = { "B2":"Free Drink Voucher", "C7":"Backstage Tour Pass", "E10":"VIP Lounge Access" };
@@ -240,7 +273,7 @@
     let lockedSeatIds = [];
     let hasLockedIn   = false;
 
-    // —— Build grid & multi-select ——  
+    // —— Build grid & multi-select ——
     rows.forEach(row => {
       const rowLabel = document.createElement('div');
       rowLabel.className = 'label';
@@ -289,7 +322,7 @@
       }
     });
 
-    // —— 3D Preview Setup ——  
+    // —— 3D Preview setup & previewSeat() ——
     let renderer, scene, camera, seats3D = [];
     function initThreeJS() {
       const canvas = document.getElementById("threeCanvas");
@@ -334,8 +367,6 @@
       requestAnimationFrame(animate);
       if (renderer && scene && camera) renderer.render(scene, camera);
     }
-
-    // —— Preview Last Seat ——  
     function previewSeat() {
       if (!selectedSeats.length && !lockedSeatIds.length) {
         alert("No seat selected to preview.");
@@ -359,7 +390,7 @@
       }
     }
 
-    // —— Clear All ——  
+    // —— Clear All ——
     function clearAll() {
       selectedSeats.forEach(s => s.classList.remove('selected'));
       selectedSeats = [];
@@ -369,7 +400,7 @@
       clearAllBtn.style.display = 'none';
     }
 
-    // —— Lock In & Enable Checkout ——  
+    // —— Lock In & enable Checkout ——
     function lockInSeat() {
       if (!selectedSeats.length || hasLockedIn) return;
       const ids   = selectedSeats.map(s => s.dataset.id);
@@ -391,9 +422,9 @@
       checkoutBtn.style.display = 'block';
     }
 
-    // —— Enhanced Checkout Flow ——  
+    // —— Enhanced Checkout flow ——
     function generateOrderNumber() {
-      return 'ORD' + Math.floor(100000 + Math.random()*900000);
+      return 'ORD' + Math.floor(100000 + Math.random() * 900000);
     }
     function showCheckout() {
       document.getElementById('selectionPage').style.display = 'none';
@@ -429,7 +460,7 @@
     });
     document.getElementById('backBtn').addEventListener('click', cancelCheckout);
 
-    // —— Gift Modal & Confetti ——  
+    // —— Gift Modal & Confetti ——
     let giftRenderer, giftScene, giftCamera, lidGroup, sparkles = [];
     let openAngle = 0, sparkleStartTime = null;
     function initGiftBox() {
@@ -445,95 +476,87 @@
       giftScene.add(dl, new THREE.AmbientLight(0x808080));
       const redMat  = new THREE.MeshStandardMaterial({ color:0xff5555 });
       const goldMat = new THREE.MeshStandardMaterial({ color:0xffd700 });
-      // Box base and walls
+      // box surfaces
       const bw=2, bh=1.5, bd=2, wt=0.1, by=-bh/2;
       const bottom = new THREE.Mesh(new THREE.BoxGeometry(bw,wt,bd), redMat);
       bottom.position.y = by*2; giftScene.add(bottom);
-      [['back',[0,by,-bd/2+wt/2]], ['front',[0,by,bd/2-wt/2]],
-       ['left',[-bw/2+wt/2,by,0]], ['right',[bw/2-wt/2,by,0]]]
-      .forEach(([_,pos]) => {
+      [['back',[0,by,-bd/2+wt/2]],['front',[0,by,bd/2-wt/2]],
+       ['left',[-bw/2+wt/2,by,0]],['right',[bw/2-wt/2,by,0]]]
+      .forEach(([_,pos])=>{
         const geo = (_==='back'||_==='front')
           ? new THREE.BoxGeometry(bw,bh,wt)
           : new THREE.BoxGeometry(wt,bh,bd);
         const m = new THREE.Mesh(geo, redMat);
         m.position.set(...pos); giftScene.add(m);
       });
-      // Ribbons
+      // ribbons & lid
       [[0,by,bd/2-wt/2],[0,by,-bd/2+wt/2]].forEach(pos=>{
-        const r = new THREE.Mesh(new THREE.BoxGeometry(0.2,bh,wt), goldMat);
+        const r=new THREE.Mesh(new THREE.BoxGeometry(0.2,bh,wt),goldMat);
         r.position.set(...pos); giftScene.add(r);
       });
       [[bw/2-wt/2,by,0],[-bw/2+wt/2,by,0]].forEach(pos=>{
-        const r = new THREE.Mesh(new THREE.BoxGeometry(wt,bh,0.2), goldMat);
+        const r=new THREE.Mesh(new THREE.BoxGeometry(wt,bh,0.2),goldMat);
         r.position.set(...pos); giftScene.add(r);
       });
-      // Lid
-      lidGroup = new THREE.Group();
-      lidGroup.position.set(0,0,-1);
-      const lidBox = new THREE.Mesh(new THREE.BoxGeometry(2.1,0.3,2.1), redMat);
-      lidBox.position.set(0,0.15,1);
-      const lr1 = new THREE.Mesh(new THREE.BoxGeometry(0.2,0.3,2.1), goldMat);
-      const lr2 = new THREE.Mesh(new THREE.BoxGeometry(2.1,0.3,0.2), goldMat);
+      lidGroup=new THREE.Group(); lidGroup.position.set(0,0,-1);
+      const lid=new THREE.Mesh(new THREE.BoxGeometry(2.1,0.3,2.1),redMat);
+      lid.position.set(0,0.15,1);
+      const lr1=new THREE.Mesh(new THREE.BoxGeometry(0.2,0.3,2.1),goldMat);
+      const lr2=new THREE.Mesh(new THREE.BoxGeometry(2.1,0.3,0.2),goldMat);
       lr1.position.set(0,0.25,1); lr2.position.set(0,0.25,1);
-      lidGroup.add(lidBox, lr1, lr2);
-      giftScene.add(lidGroup);
-      // Sparkles
-      const geo = new THREE.BufferGeometry();
-      const posArr = new Float32Array(200*3), velArr = [];
-      for (let i=0; i<200; i++){
-        posArr[i*3]   = (Math.random()-0.5)*1.2;
-        posArr[i*3+1] = Math.random()*3;
-        posArr[i*3+2] = (Math.random()-0.5)*1.2;
-        velArr.push((Math.random()-0.5)*0.02, 0.02+Math.random()*0.03, (Math.random()-0.5)*0.02);
+      lidGroup.add(lid,lr1,lr2); giftScene.add(lidGroup);
+      // sparkles
+      const geo=new THREE.BufferGeometry();
+      const posArr=new Float32Array(200*3), velArr=[];
+      for(let i=0;i<200;i++){
+        posArr[i*3]= (Math.random()-0.5)*1.2;
+        posArr[i*3+1]= Math.random()*3;
+        posArr[i*3+2]= (Math.random()-0.5)*1.2;
+        velArr.push((Math.random()-0.5)*0.02, 0.02+Math.random()*0.03,(Math.random()-0.5)*0.02);
       }
-      geo.setAttribute('position', new THREE.BufferAttribute(posArr,3));
-      geo.setAttribute('velocity', new THREE.BufferAttribute(new Float32Array(velArr),3));
-      const mat = new THREE.PointsMaterial({ color:0xffffff, size:0.2,
-        blending:THREE.AdditiveBlending, depthWrite:false, transparent:true, opacity:1 });
-      const pts = new THREE.Points(geo, mat);
-      pts.position.y = 1.2; giftScene.add(pts); sparkles.push(pts);
-      openAngle = 0; sparkleStartTime = null;
-      animateGiftBox();
+      geo.setAttribute('position',new THREE.BufferAttribute(posArr,3));
+      geo.setAttribute('velocity',new THREE.BufferAttribute(new Float32Array(velArr),3));
+      const mat=new THREE.PointsMaterial({color:0xffffff, size:0.2, blending:THREE.AdditiveBlending, depthWrite:false, transparent:true, opacity:1});
+      const pts=new THREE.Points(geo,mat); pts.position.y=1.2; giftScene.add(pts); sparkles.push(pts);
+      openAngle=0; sparkleStartTime=null; animateGiftBox();
     }
-    function animateGiftBox(ts) {
+    function animateGiftBox(ts){
       requestAnimationFrame(animateGiftBox);
-      if (openAngle < Math.PI/2) {
-        openAngle += 0.02; lidGroup.rotation.x = -openAngle;
-      }
-      if (sparkles.length && sparkleStartTime===null) sparkleStartTime = ts;
-      if (sparkles.length && sparkleStartTime!==null) {
-        const elapsed = (ts - sparkleStartTime)/1000;
-        const pa = sparkles[0].geometry.getAttribute('position');
-        const va = sparkles[0].geometry.getAttribute('velocity');
-        for (let i=0; i<pa.count; i++){
-          pa.array[i*3]   += va.array[i*3];
-          pa.array[i*3+1] += va.array[i*3+1];
-          pa.array[i*3+2] += va.array[i*3+2];
+      if(openAngle<Math.PI/2){ openAngle+=0.02; lidGroup.rotation.x=-openAngle; }
+      if(sparkles.length && sparkleStartTime===null) sparkleStartTime=ts;
+      if(sparkles.length && sparkleStartTime!==null){
+        const elapsed=(ts-sparkleStartTime)/1000;
+        const pa=sparkles[0].geometry.getAttribute('position');
+        const va=sparkles[0].geometry.getAttribute('velocity');
+        for(let i=0;i<pa.count;i++){
+          pa.array[i*3]+=va.array[i*3];
+          pa.array[i*3+1]+=va.array[i*3+1];
+          pa.array[i*3+2]+=va.array[i*3+2];
         }
-        pa.needsUpdate = true;
-        sparkles[0].material.opacity = Math.max(0, 1 - elapsed*0.3);
+        pa.needsUpdate=true;
+        sparkles[0].material.opacity=Math.max(0,1-elapsed*0.3);
       }
       giftRenderer.render(giftScene, giftCamera);
     }
-    function showGiftModal(prize) {
-      const gm = document.getElementById('giftModal');
+    function showGiftModal(prize){
+      const gm=document.getElementById('giftModal');
       gm.classList.add('centered');
-      document.getElementById('giftText').innerText = `🎁 You won: ${prize}!`;
+      document.getElementById('giftText').innerText=`🎁 You won: ${prize}!`;
       initGiftBox();
     }
-    function closeGiftModal() {
+    function closeGiftModal(){
       document.getElementById('giftModal').classList.remove('centered');
     }
-    function launchConfetti() {
-      const colors = ['#ff7e5f','#feb47b','#86e3ce','#d0e6a5','#f5d491','#ffaaa5'];
-      for (let i=0; i<80; i++){
-        const c = document.createElement('div');
-        c.className = 'confetti';
-        c.style.left = Math.random()*100+'vw';
-        c.style.backgroundColor = colors[Math.floor(Math.random()*colors.length)];
-        c.style.animationDuration = (2+Math.random()*2)+'s';
+    function launchConfetti(){
+      const colors=['#ff7e5f','#feb47b','#86e3ce','#d0e6a5','#f5d491','#ffaaa5'];
+      for(let i=0;i<80;i++){
+        const c=document.createElement('div');
+        c.className='confetti';
+        c.style.left=Math.random()*100+'vw';
+        c.style.backgroundColor=colors[Math.floor(Math.random()*colors.length)];
+        c.style.animationDuration=(2+Math.random()*2)+'s';
         document.body.appendChild(c);
-        setTimeout(()=>c.remove(), 4000);
+        setTimeout(()=>c.remove(),4000);
       }
     }
   </script>
